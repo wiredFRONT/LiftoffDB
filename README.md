@@ -9,3 +9,4 @@ Status: research. Design doc in progress.
 
 - `research/increment-1/` engine runs (Yugabyte, CockroachDB, FoundationDB, MongoDB, Turso; Neon next) and the scripts used
 - `research/02-capability-map.md` what each engine does best and how liftoffDB takes it in
+- `research/03-rewrite-map.md` what to rewrite in the Yugabyte base, in build order
