@@ -1,0 +1,19 @@
+## Neon (built from source, main @ fa50421), neon_local: 1 pageserver, 1 safekeeper, local-fs remote storage, compute PG 17.5
+CREATE TABLE
+INSERT 0 100000
+## bench kv (same script as yugabyte/cockroach), 16 clients 45s
+number of transactions actually processed: 42398
+number of failed transactions: 0 (0.000%)
+latency average = 16.989 ms
+initial connection time = 13.668 ms
+tps = 941.804426 (without initial connection time)
+## branching and PITR (2M-row table, 130 MB; deleted 1M rows on main, then branched)
+branch_create_ms=19          (neon_local timeline branch, copy-on-write, no data copied)
+pitr_branch_create_ms=21     (branch at the LSN before the delete: 2,000,000 rows visible again)
+b1 branch: update visible on b1, main unchanged (isolation confirmed)
+endpoint start on a branch / compute restart: ~90 s, but that is neon_local's 90 s timeout waiting on compute_ctl's HTTP port in this sandbox; Postgres itself was serving well before. Not a real cold-start number.
+cold full scan after compute restart: 7.3 s; warm: 3.8 s (pages fetched from the pageserver on first read)
+disk: pageserver 387 MB local, remote (local fs) 318 MB
+## notes
+- ghcr.io and Docker Hub images were refused in this sandbox, so Neon was built from source (all four PG versions are needed for postgres_ffi).
+- Postgres refuses to run as root, so the stack ran as an unprivileged user.

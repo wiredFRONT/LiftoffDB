@@ -80,7 +80,7 @@ Take in (run, docs):
 
 ## Neon (copy allowed)
 
-Run pending (see increment-1 README for status).
+Observed (run): 942 tps on the same KV script (between Yugabyte's 901 and CockroachDB's 1,140), 13.7 ms connect. Branch creation took 19 ms on a 130 MB table, and a point-in-time branch from before a 1M-row delete brought all 2M rows back in 21 ms. Writes on a branch stay off main. First full scan after a compute restart ran 7.3 s against 3.8 s warm, since pages come from the pageserver on first read.
 
 Take in (docs):
 - **Storage/compute split**: Postgres compute is stateless; WAL goes to safekeepers (Paxos), pages are served by a pageserver from versioned layer files on object storage.
