@@ -1,0 +1,5 @@
+## FDB 7.3.63 single process (RF1), redwood, KV upsert+read per txn, Python client (GIL-bound client, so a floor not a ceiling)
+threads=1 txn/s=533
+threads=16 txn/s=3050
+## fdbserver threads/rss
+   6 138904 fdbserver

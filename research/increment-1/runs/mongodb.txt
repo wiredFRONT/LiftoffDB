@@ -1,0 +1,7 @@
+## MongoDB 8.0 single-member replica set, w:majority, upsert+read, Python client (GIL-bound)
+threads=1 ops/s=438
+threads=16 ops/s=1102
+vectorSearch: Using $search and $vectorSearch aggregation stages requires additional configuration. Please connect to Atlas or an AtlasCLI local deployment to enable.For more
+version 8.0.38
+VmRSS:	  240956 kB
+Threads:	77

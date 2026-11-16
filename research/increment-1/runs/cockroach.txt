@@ -1,0 +1,53 @@
+## version
+version
+CockroachDB CCL v25.2.28 (x86_64-pc-linux-gnu, built 2026/11/10 22:02:15, go1.23.12 X:nocoverageredesign)
+## vector
+CREATE TABLE
+INSERT 0 2
+id	d
+1	0
+2	2.8284271247461903
+ERROR: SET CLUSTER SETTING cannot be used inside a multi-statement transaction
+Failed running "sql"
+## threads/mem
+VmRSS:	  624156 kB
+Threads:	15
+CREATE TABLE
+SET CLUSTER SETTING
+NOTICE: CREATE VECTOR INDEX will disable writes to the table while the index is being built
+CREATE INDEX
+info
+distribution: local
+vectorized: true
+
+• top-k
+│ order: +column7
+│ k: 1
+│
+└── • render
+"    │"
+"    └── • lookup join"
+"        │ table: vt@vt_pkey"
+## bench kv (same script as yugabyte)
+number of transactions actually processed: 51341
+number of failed transactions: 0 (0.000%)
+latency average = 14.028 ms
+initial connection time = 5.582 ms
+tps = 1140.577429 (without initial connection time)
+## failover: kill crdb3 at t=20s
+progress: 5.0 s, 863.0 tps, lat 18.441 ms stddev 7.109, 0 failed, 0 retried, 0 retries
+progress: 10.0 s, 980.2 tps, lat 16.327 ms stddev 6.192, 0 failed, 0 retried, 0 retries
+progress: 15.0 s, 917.6 tps, lat 17.433 ms stddev 7.495, 0 failed, 0 retried, 0 retries
+progress: 20.0 s, 951.0 tps, lat 16.111 ms stddev 6.333, 0 failed, 0 retried, 0 retries
+progress: 25.0 s, 0.0 tps, lat 0.000 ms stddev 0.000, 0 failed, 0 retried, 0 retries
+progress: 30.0 s, 1151.6 tps, lat 24.854 ms stddev 289.249, 0 failed, 0 retried, 0 retries
+progress: 35.0 s, 1167.6 tps, lat 11.981 ms stddev 4.645, 0 failed, 0 retried, 0 retries
+progress: 40.0 s, 1147.6 tps, lat 12.193 ms stddev 4.524, 0 failed, 0 retried, 0 retries
+progress: 45.0 s, 1111.4 tps, lat 12.591 ms stddev 4.766, 0 failed, 0 retried, 0 retries
+progress: 50.0 s, 1130.6 tps, lat 12.393 ms stddev 4.486, 0 failed, 0 retried, 0 retries
+progress: 55.0 s, 1012.6 tps, lat 13.809 ms stddev 5.589, 0 failed, 0 retried, 0 retries
+progress: 60.0 s, 1102.0 tps, lat 12.699 ms stddev 4.861, 0 failed, 0 retried, 0 retries
+number of failed transactions: 0 (0.000%)
+number of transactions retried: 0 (0.000%)
+tps = 961.466183 (without initial connection time)
+NOTE: ~5-9s stall (one 5s bucket at 0 tps) after hard kill of 1/3; 0 failed. Connect time 5.6ms vs Yugabyte 106ms (YSQL forks a PG backend + loads catalog per connection). crdb process: 15 OS threads (Go runtime M:N), RSS ~610MB idle.

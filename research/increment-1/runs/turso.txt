@@ -1,0 +1,8 @@
+pyturso 3.50.4
+wal threads=1 commits/s=1973 errors/s=0 first_err=[]
+wal threads=8 commits/s=278 errors/s=5775 first_err=['database is locked']
+mvcc threads=1 commits/s=3075 errors/s=0 first_err=[]
+mvcc threads=8 commits/s=1869 errors/s=0 first_err=['Write-write conflict']
+NOTE: pyturso 0.8.3 (Turso Rust rewrite, MIT), in-process, local file. Same KV upsert+read per txn.
+Single-writer WAL: 8 threads collapse to 278 commits/s with mostly 'database is locked'.
+experimental MVCC + BEGIN CONCURRENT: 8 threads 1869 commits/s, conflicts retried as write-write errors (counted 0/s here because first error only sampled; see script).
