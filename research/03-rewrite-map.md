@@ -35,11 +35,30 @@ Evidence tags as in increment 2: **run**, **src**, **docs**.
 Strangler pattern: every rewrite lands behind an existing seam (`pggate`, the storage interface, the consensus interface),
 runs in the simulator first (item 1), then replaces the old part. Nothing is rewritten without a test that fails on the old part.
 
-## Open decision (one per pass)
+## Decision: Rust, if Rust can reach every item (Nov 16)
 
-**Language for rewritten parts.** This gates items 1, 3, 4, 5 and 6.
+Checked item by item. Crate versions read from crates.io on Nov 16 2026; repo facts from GitHub the same day.
+Rust code reaches the C++ DocDB through `cxx` 1.0.205 at the seams named under Approach.
 
-1. **Rust:** matches your full-Rust stack and Vyrm; new code is memory-safe; cost is a C++/Rust boundary at each seam for years.
-2. **C++:** same language as Yugabyte; no boundary cost; every rewrite stays in the codebase it replaces.
+| # | Item | Rust reaches it? | Crates and prior art |
+|---|---|---|---|
+| 1 | Crash simulator | Yes | `madsim` 0.2.34 (deterministic runtime, used by RisingWave), `turmoil` 0.7.2 (simulated network for tokio); Turso ships its own deterministic simulator (MIT, active) |
+| 2A | Pooled sessions | Yes | `pgwire` 0.42.3 (Postgres wire protocol); PgCat and PgDog are Rust poolers (docs, not checked here) |
+| 2B | Threaded backend | **No, not with Postgres compatibility** | See gap below |
+| 3 | Faster failover | Yes | `openraft` 0.10.0 (leader lease, pre-vote); `raft` 0.7.0 is TiKV's Raft (last release 2023, maintained in the TiKV tree, Apache-2.0) |
+| 4 | Storage per tablet | Yes | Vyrm; `fjall` 3.1.13; TiKV's engine traits as the seam pattern |
+| 5 | One-round commit | Yes | TiKV's async commit and 1PC (Rust, Apache-2.0) as prior art; the protocol itself is language-neutral |
+| 6 | Single node role | Yes | TiKV raftstore (multi-Raft in Rust) and `openraft` for the catalog group |
+| 7 | Filtered vector search | Yes | Qdrant's filterable HNSW (Rust, Apache-2.0); `usearch` 2.26.6 (Rust bindings, C++ core, already in Yugabyte); `lancedb` 0.41.0; `hnsw_rs` 0.3.5 |
 
-Storage choice (Vyrm or a cleaned RocksDB) follows from this answer and comes next.
+### Gap: threaded backend (2B)
+
+The parser, planner, executor and extension ABI are Postgres C code (`src/postgres`, ~3,000 files), kept for compatibility.
+Making them run as threads instead of processes means changing that C code (its process-global state), not writing Rust.
+The only Rust route is replacing the SQL engine (`datafusion` 55.2.0, `sqlparser` 0.64.0, `pgwire`), as GreptimeDB and RisingWave do,
+and that drops Postgres extension compatibility (pgvector, PostGIS and the rest), which contradicts the base choice.
+`pgrx` 0.20.0 writes Postgres extensions in Rust but runs inside the same process model, so it does not close the gap.
+
+Status: 2B is held. Everything else proceeds in Rust. 2A (pooling) cuts connect time and session count without touching the backend.
+
+Storage choice (Vyrm or `fjall`) comes after 2B is settled.
